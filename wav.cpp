@@ -68,9 +68,17 @@ auto arrayOfBytes(Args... args)
         return std::array<std::byte, sizeof...(args)>{(std::byte)args...,};
 }
 
+/// Generates the WavFile from the passed data vector.
 WavFile generateWavFromData (std::vector<std::byte> data)
 {
         WavFile file;
+
+        std::move(std::begin(data),
+                  std::begin(data) + 4,
+                  std::begin(file.chunk_id));
+
+        if (file.chunk_id != arrayOfBytes('R', 'I', 'F', 'F'))
+                throw new std::exception("Bad chunk id in the input data.");
 
         return file;
 }
