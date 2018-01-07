@@ -62,6 +62,12 @@ private:
         friend WavFile generateWavFromData(std::vector<std::byte>);
 };
 
+template <typename... Args>
+auto arrayOfBytes(Args... args)
+{
+        return std::array<std::byte, sizeof...(args)>{(std::byte)args...,};
+}
+
 WavFile generateWavFromData (std::vector<std::byte> data)
 {
         WavFile file;
