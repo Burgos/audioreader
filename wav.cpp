@@ -50,6 +50,13 @@ struct WavFile {
 
         /// Actual sound data
         std::vector<std::byte> data;
+
+
+        WavFile() = delete;
+        WavFile(WavFile&& rhs) = default;
+        WavFile(const WavFile& wf) = default;
+        WavFile& operator=(const WavFile& wf) = default;
+        WavFile& operator=(WavFile& wf) = default;
 };
 
 #ifdef STUB_MAIN
