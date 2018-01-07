@@ -1,5 +1,5 @@
 #include <array>
-#include <vector>
+#include <deque>
 #include <cstddef>
 
 struct WavFile {
@@ -49,7 +49,7 @@ struct WavFile {
         int32_t datachk_size;
 
         /// Actual sound data
-        std::vector<std::byte> data;
+        std::deque<std::byte> data;
 
 
         WavFile(WavFile&& rhs) = default;
@@ -59,7 +59,7 @@ struct WavFile {
 
 private:
         WavFile(){}
-        friend WavFile generateWavFromData(std::vector<std::byte>);
+        friend WavFile generateWavFromData(std::deque<std::byte>);
 };
 
 template <typename... Args>
@@ -68,8 +68,8 @@ auto arrayOfBytes(Args... args)
         return std::array<std::byte, sizeof...(args)>{(std::byte)args...,};
 }
 
-/// Generates the WavFile from the passed data vector.
-WavFile generateWavFromData (std::vector<std::byte> data)
+/// Generates the WavFile from the passed data deque.
+WavFile generateWavFromData (std::deque<std::byte> data)
 {
         WavFile file;
 
