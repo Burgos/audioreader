@@ -68,6 +68,21 @@ auto arrayOfBytes(Args... args)
         return std::array<std::byte, sizeof...(args)>{(std::byte)args...,};
 }
 
+/// Consumes the data from the deque.
+template <typename T>
+auto consumeFromVector (std::deque<std::byte>& data)
+{
+        static_assert(sizeof(T) > 0);
+
+        if (data.size() < sizeof(T))
+                throw new std::exception("Not enough data to read.");
+
+        // assume little endian TODO
+        auto val = *reinterpret_cast<T*>(&data[0]);
+        data.erase(std::cbegin(data), std::cbegin(data) + sizeof(T));
+        return val;
+}
+
 /// Generates the WavFile from the passed data deque.
 WavFile generateWavFromData (std::deque<std::byte> data)
 {
