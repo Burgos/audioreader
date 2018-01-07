@@ -52,12 +52,22 @@ struct WavFile {
         std::vector<std::byte> data;
 
 
-        WavFile() = delete;
         WavFile(WavFile&& rhs) = default;
         WavFile(const WavFile& wf) = default;
         WavFile& operator=(const WavFile& wf) = default;
         WavFile& operator=(WavFile& wf) = default;
+
+private:
+        WavFile(){}
+        friend WavFile generateWavFromData(std::vector<std::byte>);
 };
+
+WavFile generateWavFromData (std::vector<std::byte> data)
+{
+        WavFile file;
+
+        return file;
+}
 
 #ifdef STUB_MAIN
 int main()
