@@ -91,9 +91,39 @@ WavFile generateWavFromData (std::deque<std::byte> data)
         std::move(std::begin(data),
                   std::begin(data) + 4,
                   std::begin(file.chunk_id));
-
         if (file.chunk_id != arrayOfBytes('R', 'I', 'F', 'F'))
                 throw new std::exception("Bad chunk id in the input data.");
+
+        file.chunk_size = consumeFromVector<int32_t>(data);
+
+        std::move(std::begin(data),
+                  std::begin(data) + 4,
+                  std::begin(file.format));
+        if (file.format != arrayOfBytes('W', 'A', 'V', 'E'))
+                throw new std::exception("Bad chunk id in the input data.");
+
+        std::move(std::begin(data),
+                  std::begin(data) + 4,
+                  std::begin(file.fmtchk_id));
+        if (file.format != arrayOfBytes('f', 'm', 't', ' '))
+                throw new std::exception("Bad chunk id in the input data.");
+
+        file.fmtchk_size = consumeFromVector<int32_t>(data);
+        file.fmtchk_format = consumeFromVector<int16_t>(data);
+        file.fmtchk_numchannels = consumeFromVector<int16_t>(data);
+        file.fmtchk_samplerate = consumeFromVector<int32_t>(data);
+        file.fmtchk_byterate = consumeFromVector<int32_t>(data);
+        file.fmtchk_blockalign = consumeFromVector<int32_t>(data);
+        file.fmtchk_bitspersample = consumeFromVector<int32_t>(data);
+
+        std::move(std::begin(data),
+                  std::begin(data) + 4,
+                  std::begin(file.datachk_id));
+        if (file.format != arrayOfBytes('d', 'a', 't', 'a'))
+                throw new std::exception("Bad chunk id in the input data.");
+
+        file.datachk_size = consumeFromVector<int32_t>(data);
+        file.data = std::move(data);
 
         return file;
 }
