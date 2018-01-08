@@ -1,6 +1,7 @@
 #include <array>
-#include <deque>
+#include <vector>
 #include <cstddef>
+#include <cassert>
 
 struct WavFile {
         /// Chunk id, RIFF, big endian
@@ -48,8 +49,11 @@ struct WavFile {
         /// size of the data
         int32_t datachk_size;
 
-        /// Actual sound data
-        std::deque<std::byte> data;
+        /// Data container
+        std::vector<std::byte> data;
+
+        /// Iterator to the data segment.
+        decltype(data)::iterator data_it;
 
 
         WavFile(WavFile&& rhs) = default;
@@ -59,7 +63,9 @@ struct WavFile {
 
 private:
         WavFile(){}
-        friend WavFile generateWavFromData(std::deque<std::byte>);
+
+        template <typename Container>
+        friend WavFile generateWavFromData(Container&&);
 };
 
 template <typename... Args>
@@ -68,62 +74,68 @@ auto arrayOfBytes(Args... args)
         return std::array<std::byte, sizeof...(args)>{(std::byte)args...,};
 }
 
-/// Consumes the data from the deque.
-template <typename T>
-auto consumeFromVector (std::deque<std::byte>& data)
+template <typename T, typename It1, typename It2>
+auto consumeFromIt (It1& it, const It2& end)
 {
         static_assert(sizeof(T) > 0);
 
-        if (data.size() < sizeof(T))
+        if (std::distance(it, end) < sizeof(T))
                 throw new std::exception("Not enough data to read.");
 
         // assume little endian TODO
-        auto val = *reinterpret_cast<T*>(&data[0]);
-        data.erase(std::cbegin(data), std::cbegin(data) + sizeof(T));
+        auto val = *reinterpret_cast<T*>(*it);
+        it += sizeof(T);
         return val;
 }
 
-/// Generates the WavFile from the passed data deque.
-WavFile generateWavFromData (std::deque<std::byte> data)
+//
+/// Generates the WavFile from the passed data.
+template <typename Container>
+WavFile generateWavFromData (Container&& data)
 {
         WavFile file;
 
-        std::move(std::begin(data),
-                  std::begin(data) + 4,
+        file.data = std::forward<Container>(data);
+        auto it = std::begin(file.data);
+
+        std::move(it,
+                  it + 4,
                   std::begin(file.chunk_id));
         if (file.chunk_id != arrayOfBytes('R', 'I', 'F', 'F'))
                 throw new std::exception("Bad chunk id in the input data.");
 
-        file.chunk_size = consumeFromVector<int32_t>(data);
+        file.chunk_size = consumeFromIt<int32_t>(it, std::end(file.data));
 
-        std::move(std::begin(data),
-                  std::begin(data) + 4,
+        std::move(it,
+                  it + 4,
                   std::begin(file.format));
         if (file.format != arrayOfBytes('W', 'A', 'V', 'E'))
                 throw new std::exception("Bad chunk id in the input data.");
 
-        std::move(std::begin(data),
-                  std::begin(data) + 4,
+        std::move(it,
+                  it + 4,
                   std::begin(file.fmtchk_id));
         if (file.format != arrayOfBytes('f', 'm', 't', ' '))
                 throw new std::exception("Bad chunk id in the input data.");
 
-        file.fmtchk_size = consumeFromVector<int32_t>(data);
-        file.fmtchk_format = consumeFromVector<int16_t>(data);
-        file.fmtchk_numchannels = consumeFromVector<int16_t>(data);
-        file.fmtchk_samplerate = consumeFromVector<int32_t>(data);
-        file.fmtchk_byterate = consumeFromVector<int32_t>(data);
-        file.fmtchk_blockalign = consumeFromVector<int32_t>(data);
-        file.fmtchk_bitspersample = consumeFromVector<int32_t>(data);
+        file.fmtchk_size = consumeFromIt<int32_t>(it, std::end(file.data));
+        file.fmtchk_format = consumeFromIt<int16_t>(it, std::end(file.data));
+        file.fmtchk_numchannels = consumeFromIt<int16_t>(it, std::end(file.data));
+        file.fmtchk_samplerate = consumeFromIt<int32_t>(it, std::end(file.data));
+        file.fmtchk_byterate = consumeFromIt<int32_t>(it, std::end(file.data));
+        file.fmtchk_blockalign = consumeFromIt<int32_t>(it, std::end(file.data));
+        file.fmtchk_bitspersample = consumeFromIt<int32_t>(it, std::end(file.data));
 
-        std::move(std::begin(data),
-                  std::begin(data) + 4,
+        std::move(it,
+                  it + 4,
                   std::begin(file.datachk_id));
         if (file.format != arrayOfBytes('d', 'a', 't', 'a'))
                 throw new std::exception("Bad chunk id in the input data.");
 
-        file.datachk_size = consumeFromVector<int32_t>(data);
-        file.data = std::move(data);
+        file.datachk_size = consumeFromIt<int32_t>(it, std::end(file.data));
+
+        // Iterator now points to the data segment.
+        file.data_it = it;
 
         return file;
 }
@@ -131,6 +143,26 @@ WavFile generateWavFromData (std::deque<std::byte> data)
 #ifdef STUB_MAIN
 int main()
 {
+        // test it throws
+
+        try
+        {
+                std::vector<std::byte> data{0};
+                generateWavFromData(data);
+                assert(false);
+        }
+        catch (...)
+        {}
+
+        try
+        {
+                std::vector<std::byte> data{0};
+                generateWavFromData(std::move(data));
+                assert(false);
+        }
+        catch (...)
+        {}
+
         return 0;
 }
 #endif
