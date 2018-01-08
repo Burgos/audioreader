@@ -117,25 +117,28 @@ WavFile generateWavFromData (Container&& data)
         file.data = std::forward<Container>(data);
         auto it = std::begin(file.data);
 
-        std::move(it,
-                  it + 4,
-                  std::begin(file.chunk_id));
+        std::copy(it,
+            it + 4,
+            std::begin(file.chunk_id));
+        it += 4;
         if (file.chunk_id != arrayOfBytes('R', 'I', 'F', 'F'))
                 throw new std::exception("Bad chunk id in the input data.");
 
         file.chunk_size = consumeFromIt<int32_t>(it, std::end(file.data));
 
-        std::move(it,
-                  it + 4,
-                  std::begin(file.format));
+        std::copy(it,
+            it + 4,
+            std::begin(file.format));
+        it += 4;
         if (file.format != arrayOfBytes('W', 'A', 'V', 'E'))
-                throw new std::exception("Bad chunk id in the input data.");
-
-        std::move(it,
-                  it + 4,
-                  std::begin(file.fmtchk_id));
-        if (file.format != arrayOfBytes('f', 'm', 't', ' '))
-                throw new std::exception("Bad chunk id in the input data.");
+            throw new std::exception("Bad chunk id in the input data.");
+	
+        std::copy(it,
+            it + 4,
+            std::begin(file.fmtchk_id));
+        it += 4;
+        if (file.fmtchk_id != arrayOfBytes('f', 'm', 't', ' '))
+            throw new std::exception("Bad chunk id in the input data.");
 
         file.fmtchk_size = consumeFromIt<int32_t>(it, std::end(file.data));
         file.fmtchk_format = consumeFromIt<int16_t>(it, std::end(file.data));
@@ -145,11 +148,12 @@ WavFile generateWavFromData (Container&& data)
         file.fmtchk_blockalign = consumeFromIt<int16_t>(it, std::end(file.data));
         file.fmtchk_bitspersample = consumeFromIt<int16_t>(it, std::end(file.data));
 
-        std::move(it,
-                  it + 4,
-                  std::begin(file.datachk_id));
-        if (file.format != arrayOfBytes('d', 'a', 't', 'a'))
-                throw new std::exception("Bad chunk id in the input data.");
+        std::copy(it,
+            it + 4,
+            std::begin(file.datachk_id));
+        it = it + 4;
+        if (file.datachk_id != arrayOfBytes('d', 'a', 't', 'a'))
+            throw new std::exception("Bad chunk id in the input data.");
 
         file.datachk_size = consumeFromIt<int32_t>(it, std::end(file.data));
 
