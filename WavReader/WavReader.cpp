@@ -76,7 +76,7 @@ auto arrayOfBytes(Args... args)
 }
 
 template <typename T, typename It1, typename It2>
-auto consumeFromIt (It1& it, const It2& end)
+auto safeConsumeFromIt(It1& it, const It2& end)
 {
         static_assert(sizeof(T) > 0);
 
@@ -85,6 +85,18 @@ auto consumeFromIt (It1& it, const It2& end)
 
         // assume little endian TODO
         auto val = *reinterpret_cast<T*>(*it);
+        it += sizeof(T);
+        return val;
+}
+
+// Use only if you know we have enough data.
+template <typename T, typename It1, typename It2>
+auto consumeFromIt(It1& it, const It2& end) throw()
+{
+        static_assert(sizeof(T) > 0);
+
+        // assume little endian TODO
+        auto val = *reinterpret_cast<T*>(&*it);
         it += sizeof(T);
         return val;
 }
