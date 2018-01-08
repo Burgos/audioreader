@@ -163,7 +163,11 @@ WavFile generateWavFromData (Container&& data)
         return file;
 }
 
-#ifdef STUB_MAIN
+constexpr std::byte asByte(unsigned char val)
+{
+        return std::byte{ val };
+}
+
 int main()
 {
         // test it throws
@@ -184,8 +188,30 @@ int main()
                 assert(false);
         }
         catch (...)
-        {}
+        {
+        }
+
+        std::vector<std::byte> test_data{ asByte(0x52), asByte(0x49),
+	        asByte(0x46), asByte(0x46), asByte(0x24), asByte(0x08),
+	        asByte(0x00), asByte(0x00), asByte(0x57), asByte(0x41),
+	        asByte(0x56), asByte(0x45), asByte(0x66), asByte(0x6d),
+	        asByte(0x74), asByte(0x20), asByte(0x10), asByte(0x00),
+	        asByte(0x00), asByte(0x00), asByte(0x01), asByte(0x00),
+	        asByte(0x02), asByte(0x00), asByte(0x22), asByte(0x56),
+	        asByte(0x00), asByte(0x00), asByte(0x88), asByte(0x58),
+	        asByte(0x01), asByte(0x00), asByte(0x04), asByte(0x00),
+	        asByte(0x10), asByte(0x00), asByte(0x64), asByte(0x61),
+	        asByte(0x74), asByte(0x61), asByte(0x00), asByte(0x08),
+	        asByte(0x00), asByte(0x00), asByte(0x00), asByte(0x00),
+	        asByte(0x00), asByte(0x00), asByte(0x24), asByte(0x17),
+	        asByte(0x1e), asByte(0xf3), asByte(0x3c), asByte(0x13),
+	        asByte(0x3c), asByte(0x14), asByte(0x16), asByte(0xf9),
+	        asByte(0x18), asByte(0xf9), asByte(0x34), asByte(0xe7),
+	        asByte(0x23), asByte(0xa6), asByte(0x3c), asByte(0xf2),
+	        asByte(0x24), asByte(0xf2), asByte(0x11), asByte(0xce),
+	        asByte(0x1a), asByte(0x0d) };
+
+        auto wavFile{ generateWavFromData(std::move(test_data)) };
 
         return 0;
 }
-#endif
