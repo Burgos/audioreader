@@ -38,10 +38,10 @@ struct WavFile {
 
         /// block align Number of bytes for one sample
         /// including all channels.
-        int32_t fmtchk_blockalign;
+        int16_t fmtchk_blockalign;
 
         /// Bits per sample
-        int32_t fmtchk_bitspersample;
+        int16_t fmtchk_bitspersample;
 
         // Data chunk
         
@@ -125,8 +125,8 @@ WavFile generateWavFromData (Container&& data)
         file.fmtchk_numchannels = consumeFromIt<int16_t>(it, std::end(file.data));
         file.fmtchk_samplerate = consumeFromIt<int32_t>(it, std::end(file.data));
         file.fmtchk_byterate = consumeFromIt<int32_t>(it, std::end(file.data));
-        file.fmtchk_blockalign = consumeFromIt<int32_t>(it, std::end(file.data));
-        file.fmtchk_bitspersample = consumeFromIt<int32_t>(it, std::end(file.data));
+        file.fmtchk_blockalign = consumeFromIt<int16_t>(it, std::end(file.data));
+        file.fmtchk_bitspersample = consumeFromIt<int16_t>(it, std::end(file.data));
 
         std::move(it,
                   it + 4,
