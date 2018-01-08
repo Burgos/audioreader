@@ -101,6 +101,14 @@ auto consumeFromIt(It1& it, const It2& end) throw()
     return val;
 }
 
+/// std::copy like, but advances the iterator
+template <typename ItIn, typename ItOut>
+void consume(ItIn& first, const ItIn& last, ItOut d_first)
+{
+    std::copy(first, last, d_first);
+    first += std::distance(first, last);
+}
+
 //
 /// Generates the WavFile from the passed data.
 template <typename Container>
@@ -118,26 +126,17 @@ WavFile generateWavFromData(Container&& data)
 
     auto it = std::begin(file.data);
 
-    std::copy(it,
-        it + 4,
-        std::begin(file.chunk_id));
-    it += 4;
+    consume(it, it + 4, std::begin(file.chunk_id));
     if (file.chunk_id != arrayOfBytes('R', 'I', 'F', 'F'))
         throw new std::exception("Bad chunk id in the input data.");
 
     file.chunk_size = consumeFromIt<int32_t>(it, std::end(file.data));
 
-    std::copy(it,
-        it + 4,
-        std::begin(file.format));
-    it += 4;
+    consume(it, it + 4, std::begin(file.format));
     if (file.format != arrayOfBytes('W', 'A', 'V', 'E'))
         throw new std::exception("Bad chunk id in the input data.");
 
-    std::copy(it,
-        it + 4,
-        std::begin(file.fmtchk_id));
-    it += 4;
+    consume(it, it + 4, std::begin(file.fmtchk_id));
     if (file.fmtchk_id != arrayOfBytes('f', 'm', 't', ' '))
         throw new std::exception("Bad chunk id in the input data.");
 
@@ -149,10 +148,7 @@ WavFile generateWavFromData(Container&& data)
     file.fmtchk_blockalign = consumeFromIt<int16_t>(it, std::end(file.data));
     file.fmtchk_bitspersample = consumeFromIt<int16_t>(it, std::end(file.data));
 
-    std::copy(it,
-        it + 4,
-        std::begin(file.datachk_id));
-    it = it + 4;
+    consume(it, it + 4, std::begin(file.datachk_id));
     if (file.datachk_id != arrayOfBytes('d', 'a', 't', 'a'))
         throw new std::exception("Bad chunk id in the input data.");
 
