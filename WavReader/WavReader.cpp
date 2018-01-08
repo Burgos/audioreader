@@ -108,6 +108,12 @@ WavFile generateWavFromData (Container&& data)
 {
         WavFile file;
 
+        // confirm we have enough data
+        if (data.size() < 44)
+        {
+            throw new std::exception("Not enough data to read.");
+        }
+
         file.data = std::forward<Container>(data);
         auto it = std::begin(file.data);
 
