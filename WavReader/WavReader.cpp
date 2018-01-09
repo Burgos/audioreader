@@ -30,7 +30,7 @@ auto safeConsumeFromIt(It1& it, const It2& end)
 
 // Use only if you know we have enough data.
 template <typename T, typename It1, typename It2>
-auto consumeFromIt(It1& it, const It2& end) throw()
+auto consumeFromIt(It1& it, const It2& end) noexcept
 {
     static_assert(sizeof(T) > 0);
 
