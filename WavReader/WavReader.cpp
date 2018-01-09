@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <cassert>
 
+#include <iostream>
+
 #include "WavReader.h"
 
 
@@ -153,7 +155,12 @@ int main()
         asByte(0x24), asByte(0xf2), asByte(0x11), asByte(0xce),
         asByte(0x1a), asByte(0x0d) };
 
-    auto wavFile{ generateWavFromData(std::move(test_data)) };
+    auto wavFile{ std::make_shared<WavFile>(generateWavFromData(std::move(test_data))) };
+
+    for (const auto& s : wavFile)
+    {
+        std::cout << std::hex << std::to_integer<int>(s[0][0]) << std::endl;
+    }
 
     return 0;
 }
