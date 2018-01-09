@@ -95,6 +95,12 @@ WavFile generateWavFromData(std::vector<std::byte> data)
     // Iterator now points to the data segment.
     file.data_it = it;
 
+    // let's check if there's enough data or if this is all in vain
+    if (std::distance(file.data_it, std::end(file.data)) < file.datachk_size)
+    {
+        throw new std::exception("Unexpected EOF while reading the input data");
+    }
+
     return file;
 }
 
@@ -137,7 +143,7 @@ int main()
         asByte(0x00), asByte(0x00), asByte(0x88), asByte(0x58),
         asByte(0x01), asByte(0x00), asByte(0x04), asByte(0x00),
         asByte(0x10), asByte(0x00), asByte(0x64), asByte(0x61),
-        asByte(0x74), asByte(0x61), asByte(0x00), asByte(0x08),
+        asByte(0x74), asByte(0x61), asByte(0x1c), asByte(0x00),
         asByte(0x00), asByte(0x00), asByte(0x00), asByte(0x00),
         asByte(0x00), asByte(0x00), asByte(0x24), asByte(0x17),
         asByte(0x1e), asByte(0xf3), asByte(0x3c), asByte(0x13),
