@@ -27,7 +27,7 @@ const std::byte* Sample::operator&() const
 int Sample::number_of_channels() const { return (*file).fmtchk_numchannels; }
 int Sample::channel_size() const { return (*file).fmtchk_bitspersample; }
 
-Sample::Sample(std::shared_ptr<WavFile> f, int32_t off) : file(f), sample_offset(off)
+Sample::Sample(std::shared_ptr<WavFile> f, int32_t off) : file(std::move(f)), sample_offset(off)
 {
-    bits_per_sample = (*f).fmtchk_bitspersample;
+    bits_per_sample = (*file).fmtchk_bitspersample;
 }
