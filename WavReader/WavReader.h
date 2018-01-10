@@ -82,7 +82,7 @@ struct Sample
 {
     struct Channel
     {
-        std::byte operator[](std::size_t idx) const
+        const std::byte& operator[](std::size_t idx) const
         {
             auto bytes_per_sample{ (*s.file).fmtchk_bitspersample / 8 };
             assert(idx >= 0 && static_cast<int>(idx) < bytes_per_sample);
