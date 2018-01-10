@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <memory>
 
+#include "Sample.h"
+
 struct WavFile {
     /// Chunk id, RIFF, big endian
     /// Not included in chunk size
@@ -76,57 +78,6 @@ private:
     friend WavFile generateWavFromData(std::vector<std::byte> data);
 };
 
-
-// Sample
-struct Sample
-{
-    struct Channel
-    {
-        const std::byte& operator[](std::size_t idx) const
-        {
-            auto bytes_per_sample{ (*s.file).fmtchk_bitspersample / 8 };
-            assert(idx >= 0 && static_cast<int>(idx) < bytes_per_sample);
-
-            return (*s.file).data_it[s.sample_offset + ch * bytes_per_sample + idx];
-        }
-
-    private:
-        const Sample& s;
-        int ch;
-        Channel(const Sample& sample, int channel):s{ sample }, ch{ channel } {}
-        friend struct Sample;
-    };
-
-    Channel operator[](int channel) const
-    {
-        assert(channel < number_of_channels());
-        return Channel(*this, channel);
-    }
-
-    const std::byte* operator&() const
-    {
-        return &((*this)[0][0]);
-    }
-
-    int number_of_channels() const { return (*file).fmtchk_numchannels; }
-    int channel_size() const { return (*file).fmtchk_bitspersample; }
-private:
-    // file
-    std::shared_ptr<WavFile> file;
-
-    // sample offset
-    int32_t sample_offset;
-
-    int16_t bits_per_sample;
-
-    Sample(std::shared_ptr<WavFile> f, int32_t off) : file(f), sample_offset(off)
-    {
-        bits_per_sample = (*f).fmtchk_bitspersample;
-    }
-
-    friend class iterator;
-};
-
 // sample iterator
 class iterator {
 public:
@@ -161,7 +112,7 @@ public:
 
     Sample operator*() const
     {
-        Sample s{ this->file, this->offset };
+        Sample s(this->file, this->offset);
         return s;
     }
 
@@ -174,15 +125,8 @@ private:
     friend iterator end(std::shared_ptr<WavFile>);
 };
 
-iterator begin(std::shared_ptr<WavFile> file)
-{
-    return iterator{ file, 0 };
-}
-
-iterator end(std::shared_ptr<WavFile> file)
-{
-    return iterator{ file, (*file).datachk_size };
-}
+iterator begin(std::shared_ptr<WavFile> file);
+iterator end(std::shared_ptr<WavFile> file);
 
 /// Generate the WavFile from data.
 WavFile generateWavFromData(std::vector<std::byte> data);

@@ -10,6 +10,17 @@
 #include "WavReader.h"
 
 
+iterator begin(std::shared_ptr<WavFile> file)
+{
+    return iterator{ file, 0 };
+}
+
+iterator end(std::shared_ptr<WavFile> file)
+{
+    return iterator{ file, (*file).datachk_size };
+}
+
+
 template <typename... Args>
 auto arrayOfBytes(Args... args)
 {
@@ -162,5 +173,10 @@ int main()
         std::cout << std::hex << std::to_integer<int>(s[0][0]) << std::endl;
     }
 
+    auto it = begin(wavFile);
+    it += 1;
+
+    std::cout << std::hex << *reinterpret_cast<const int*>(&(*it)[0][0]) << std::endl;
+    std::cout << std::hex << *reinterpret_cast<const long long*>(&(*it)) << std::endl;
     return 0;
 }
