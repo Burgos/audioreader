@@ -103,6 +103,11 @@ struct Sample
         return Channel(*this, channel);
     }
 
+    const std::byte* operator&() const
+    {
+        return &((*this)[0][0]);
+    }
+
     int number_of_channels() const { return (*file).fmtchk_numchannels; }
     int channel_size() const { return (*file).fmtchk_bitspersample; }
 private:
